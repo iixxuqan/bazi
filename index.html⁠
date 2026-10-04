@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>四合一命理全息解析系統 | 八字 x 星盤 x 人類圖 x MBTI</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;900&family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            mystic: {
+              900: '#0a0914',
+              800: '#121124',
+              700: '#1d1a38',
+              gold: '#d4af37',
+              goldLight: '#f3e5ab',
+              purple: '#6b46c1',
+              cyan: '#00f5d4'
+            }
+          },
+          fontFamily: {
+            serif: ['Noto Serif TC', 'serif'],
+            cinzel: ['Cinzel', 'serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #0a0914;
+      color: #e2e8f0;
+      font-family: 'Noto Serif TC', serif;
+      background-image: 
+        radial-gradient(circle at 15% 20%, rgba(107, 70, 193, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 85% 80%, rgba(212, 175, 55, 0.1) 0%, transparent 40%);
+    }
+    .gold-border {
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      box-shadow: 0 0 15px rgba(212, 175, 55, 0.08);
+    }
+    .gold-gradient-text {
+      background: linear-gradient(135deg, #fff3a1 0%, #d4af37 50%, #aa7c11 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .glass-card {
+      background: rgba(18, 17, 36, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+  </style>
+</head>
+<body class="min-h-screen pb-16">
+
+  <!-- 頂部 Header -->
+  <header class="py-8 text-center border-b border-mystic-gold/20 relative overflow-hidden">
+    <div class="max-w-4xl mx-auto px-4 relative z-10">
+      <h1 class="text-3xl md:text-5xl font-extrabold gold-gradient-text font-cinzel tracking-wider mb-2">
+        全息命理與性格解析平臺
+      </h1>
+      <p class="text-xs md:text-sm text-gray-400 tracking-widest">
+        EASTERN BAZI × WESTERN ASTROLOGY × HUMAN DESIGN × MBTI
+      </p>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 mt-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+    
+    <!-- 左側輸入表單 -->
+    <section class="lg:col-span-4">
+      <div class="glass-card gold-border rounded-2xl p-6 sticky top-6">
+        <h2 class="text-xl font-bold gold-gradient-text mb-6 flex items-center gap-2 border-b border-mystic-gold/20 pb-3">
+          <i class="fa-solid fa-compass text-mystic-gold"></i> 輸入個人生辰與特質
+        </h2>
+        
+        <form id="chartForm" class="space-y-4">
+          <div>
+            <label class="block text-xs text-gray-400 mb-1">姓名 / 暱稱</label>
+            <input type="text" id="userName" required placeholder="請輸入姓名" class="w-full bg-mystic-900/80 border border-mystic-gold/30 rounded-lg px-3 py-2 text-sm text-amber-100 focus:outline-none focus:border-mystic-gold">
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">生理性別</label>
+              <select id="gender" class="w-full bg-mystic-900/80 border border-mystic-gold/30 rounded-lg px-3 py-2 text-sm text-amber-100 focus:outline-none focus:border-mystic-gold">
+                <option value="乾造">男 (乾造)</option>
+                <option value="坤造">女 (坤造)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">出生出生地</label>
+              <input type="text" id="birthPlace" placeholder="如：台北/北京" value="台北" class="w-full bg-mystic-900/80 border border-mystic-gold/30 rounded-lg px-3 py-2 text-sm text-amber-100 focus:outline-none focus:border-mystic-gold">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs text-gray-400 mb-1">出生日期 (公曆)</label>
+            <input type="date" id="birthDate" required value="1995-08-18" class="w-full bg-mystic-900/80 border border-mystic-gold/30 rounded-lg px-3 py-2 text-sm text-amber-100 focus:outline-none focus:border-mystic-gold">
+          </div>
+
+          <div>
+            <label class="block text-xs text-gray-400 mb-1">出生時間 (24小時制)</label>
+            <input type="time" id="birthTime" required value="14:30" class="w-full bg-mystic-900/80 border border-mystic-gold/30 rounded-lg px-3 py-2 text-sm text-amber-100 focus:outline-none focus:border-mystic-gold">
+          </div>
+
+          <div class="pt-2 border-t border-mystic-gold/20">
+            <label class="block text-xs text-mystic-gold font-bold mb-1">MBTI 16型人格 (可選)</label>
+            <select id="mbtiSelect" class="w-full bg-mystic-900/80 border border-mystic-gold/30 rounded-lg px-3 py-2 text-sm text-amber-100 focus:outline-none focus:border-mystic-gold">
+              <option value="AUTO">不清楚 (由命盤傾向推算)</option>
+              <option value="INTJ">INTJ 建築師</option><option value="INTP">INTP 邏輯學家</option>
+              <option value="ENTJ">ENTJ 指揮官</option><option value="ENTP">ENTP 辯論家</option>
+              <option value="INFJ">INFJ 提倡者</option><option value="INFP">INFP 調停者</option>
+              <option value="ENFJ">ENFJ 主人公</option><option value="ENFP">ENFP 競選者</option>
+              <option value="ISTJ">ISTJ 物流師</option><option value="ISFJ">ISFJ 守衛者</option>
+              <option value="ESTJ">ESTJ 總管</option><option value="ESFJ">ESFJ 執政官</option>
+              <option value="ISTP">ISTP 鑑賞家</option><option value="ISFP">ISFP 探險家</option>
+              <option value="ESTP">ESTP 企業家</option><option value="ESFP">ESFP 表演者</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs text-mystic-gold font-bold mb-1">人類圖 類型 (可選)</label>
+            <select id="hdTypeSelect" class="w-full bg-mystic-900/80 border border-mystic-gold/30 rounded-lg px-3 py-2 text-sm text-amber-100 focus:outline-none focus:border-mystic-gold">
+              <option value="AUTO">自動根據星盤推算</option>
+              <option value="顯示者">顯示者 (Manifestor)</option>
+              <option value="生產者">生產者 (Generator)</option>
+              <option value="顯示生產者">顯示生產者 (Manifesting Generator)</option>
+              <option value="投射者">投射者 (Projector)</option>
+              <option value="反映者">反映者 (Reflector)</option>
+            </select>
+          </div>
+
+          <button type="submit" class="w-full mt-4 bg-gradient-to-r from-amber-600 via-mystic-gold to-amber-500 hover:from-amber-500 hover:to-amber-400 text-mystic-900 font-bold py-3 rounded-lg transition-all shadow-lg shadow-amber-900/30">
+            開始全息深度解析
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- 右側結果展示區 -->
+    <section class="lg:col-span-8 space-y-8">
+      
+      <!-- 功能操作按鈕列 -->
+      <div id="actionToolbar" class="hidden glass-card gold-border rounded-xl p-4 flex flex-wrap justify-between items-center gap-3">
+        <span class="text-xs text-amber-200"><i class="fa-solid fa-circle-check text-green-400 mr-1"></i> 解析已順利生成</span>
+        <div class="flex gap-3">
+          <button onclick="shareURL()" class="px-3 py-1.5 bg-mystic-700 hover:bg-mystic-600 text-xs border border-mystic-gold/40 rounded flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-share-nodes text-mystic-gold"></i> 分享專屬網址
+          </button>
+          <button onclick="window.print()" class="px-3 py-1.5 bg-mystic-700 hover:bg-mystic-600 text-xs border border-mystic-gold/40 rounded flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-print text-mystic-gold"></i> 列印/保存報告
+          </button>
+        </div>
+      </div>
+
+      <!-- 預設提示 -->
+      <div id="placeholderView" class="glass-card gold-border rounded-2xl p-12 text-center text-gray-400">
+        <i class="fa-solid fa-yin-yang text-6xl text-mystic-gold/40 mb-4 animate-spin-slow"></i>
+        <p class="text-lg">請於左側輸入您的出生資訊，開始探索命盤藍圖。</p>
+      </div>
+
+      <!-- 解析結果主區域 (預設隱藏) -->
+      <div id="resultView" class="hidden space-y-8">
+        
+        <!-- 四柱八字與星盤摘要 -->
+        <div class="glass-card gold-border rounded-2xl p-6">
+          <h3 class="text-lg font-bold gold-gradient-text mb-4 border-b border-mystic-gold/20 pb-2">
+            八字四柱與西方星盤總覽
+          </h3>
+          
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center mb-6">
+            <div class="bg-mystic-900/90 border border-mystic-gold/30 p-3 rounded-xl">
+              <span class="text-xs text-gray-400 block">年柱 (祖業/根基)</span>
+              <span id="baziYear" class="text-xl font-bold text-mystic-gold">--</span>
+            </div>
+            <div class="bg-mystic-900/90 border border-mystic-gold/30 p-3 rounded-xl">
+              <span class="text-xs text-gray-400 block">月柱 (事業/青年)</span>
+              <span id="baziMonth" class="text-xl font-bold text-mystic-gold">--</span>
+            </div>
+            <div class="bg-mystic-900/90 border border-mystic-gold/30 p-3 rounded-xl">
+              <span class="text-xs text-gray-400 block">日柱 (自我/配偶)</span>
+              <span id="baziDay" class="text-xl font-bold text-amber-200">--</span>
+            </div>
+            <div class="bg-mystic-900/90 border border-mystic-gold/30 p-3 rounded-xl">
+              <span class="text-xs text-gray-400 block">時柱 (晚年/歸宿)</span>
+              <span id="baziHour" class="text-xl font-bold text-mystic-gold">--</span>
+            </div>
+          </div>
+
+          <!-- 星盤與MBTI摘要標籤 -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center text-xs">
+            <div class="p-2 bg-mystic-800/60 rounded-lg border border-purple-500/30">
+              <span class="text-gray-400 block">太陽星座</span>
+              <span id="sunSign" class="font-bold text-purple-300">--</span>
+            </div>
+            <div class="p-2 bg-mystic-800/60 rounded-lg border border-purple-500/30">
+              <span class="text-gray-400 block">月亮星座</span>
+              <span id="moonSign" class="font-bold text-purple-300">--</span>
+            </div>
+            <div class="p-2 bg-mystic-800/60 rounded-lg border border-purple-500/30">
+              <span class="text-gray-400 block">上升星座</span>
+              <span id="ascSign" class="font-bold text-purple-300">--</span>
+            </div>
+            <div class="p-2 bg-mystic-800/60 rounded-lg border border-cyan-500/30">
+              <span class="text-gray-400 block">MBTI 人格</span>
+              <span id="mbtiResult" class="font-bold text-cyan-300">--</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 圖表分析區：五行 vs 人類圖九大中心 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          
+          <!-- 五行能量分配圖表 -->
+          <div class="glass-card gold-border rounded-2xl p-5 flex flex-col justify-between">
+            <h4 class="text-sm font-bold gold-gradient-text mb-3 text-center">五行能量分佈 (八字)</h4>
+            <div class="w-full h-48 flex justify-center items-center">
+              <canvas id="wuxingChart"></canvas>
+            </div>
+            <div id="wuxingSummary" class="text-xs text-center text-gray-300 mt-3 pt-2 border-t border-mystic-gold/10"></div>
+          </div>
+
+          <!-- 人類圖示意區 -->
+          <div class="glass-card gold-border rounded-2xl p-5 flex flex-col justify-between">
+            <h4 class="text-sm font-bold gold-gradient-text mb-2 text-center">人類圖 (Human Design) 定義</h4>
+            <div class="w-full h-48 flex justify-center items-center">
+              <canvas id="hdCanvas" width="220" height="190"></canvas>
+            </div>
+            <div id="hdSummary" class="text-xs text-center text-gray-300 mt-2 pt-2 border-t border-mystic-gold/10"></div>
+          </div>
+
+        </div>
+
+        <!-- 深度交叉解析四大區塊 -->
+        <div class="space-y-6">
+          
+          <!-- 1. 性格與內在心靈藍圖 -->
+          <div class="glass-card gold-border rounded-2xl p-6">
+            <h3 class="text-base font-bold text-mystic-gold mb-3 flex items-center gap-2">
+              <i class="fa-solid fa-brain"></i> 性格與靈魂藍圖
+            </h3>
+            <p id="analysisPersonality" class="text-sm leading-relaxed text-gray-200 whitespace-pre-line"></p>
+          </div>
+
+          <!-- 2. 事業、財運與天賦策略 -->
+          <div class="glass-card gold-border rounded-2xl p-6">
+            <h3 class="text-base font-bold text-mystic-gold mb-3 flex items-center gap-2">
+              <i class="fa-solid fa-briefcase"></i> 事業財運與天賦策略
+            </h3>
+            <p id="analysisCareer" class="text-sm leading-relaxed text-gray-200 whitespace-pre-line"></p>
+          </div>
+
+          <!-- 3. 感情、人際與親密關係 -->
+          <div class="glass-card gold-border rounded-2xl p-6">
+            <h3 class="text-base font-bold text-mystic-gold mb-3 flex items-center gap-2">
+              <i class="fa-solid fa-heart"></i> 感情人際與親密關係
+            </h3>
+            <p id="analysisLove" class="text-sm leading-relaxed text-gray-200 whitespace-pre-line"></p>
+          </div>
+
+          <!-- 4. 開運與人生指引 -->
+          <div class="glass-card gold-border rounded-2xl p-6 border-l-4 border-l-mystic-gold">
+            <h3 class="text-base font-bold gold-gradient-text mb-3 flex items-center gap-2">
+              <i class="fa-solid fa-gem"></i> 開運趨吉與人生最佳策略
+            </h3>
+            <p id="analysisAdvice" class="text-sm leading-relaxed text-amber-100 whitespace-pre-line"></p>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <script>
+    // 天干地支基礎數據
+    const TIAN_GAN = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"];
+    const DI_ZHI = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
+    const GAN_WUXING = {"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土","己":"土","庚":"金","辛":"金","壬":"水","癸":"水"};
+    const ZHI_WUXING = {"子":"水","丑":"土","寅":"木","卯":"木","辰":"土","巳":"火","午":"火","未":"土","申":"金","酉":"金","戌":"土","亥":"水"};
+
+    let wuxingChartInstance = null;
+
+    // 頁面載入時檢查 URL 是否帶有參數
+    window.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has('name') && urlParams.has('birthDate')) {
+        document.getElementById('userName').value = urlParams.get('name');
+        document.getElementById('birthDate').value = urlParams.get('birthDate');
+        document.getElementById('birthTime').value = urlParams.get('birthTime') || '12:00';
+        if (urlParams.has('mbti')) document.getElementById('mbtiSelect').value = urlParams.get('mbti');
+        if (urlParams.has('hd')) document.getElementById('hdTypeSelect').value = urlParams.get('hd');
+        generateAnalysis();
+      }
+    });
+
+    document.getElementById('chartForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      generateAnalysis();
+    });
+
+    function generateAnalysis() {
+      const name = document.getElementById('userName').value || '貴賓';
+      const gender = document.getElementById('gender').value;
+      const dateStr = document.getElementById('birthDate').value;
+      const timeStr = document.getElementById('birthTime').value;
+      const mbtiInput = document.getElementById('mbtiSelect').value;
+      const hdInput = document.getElementById('hdTypeSelect').value;
+
+      const dateObj = new Date(dateStr + 'T' + timeStr);
+      const year = dateObj.getFullYear();
+      const month = dateObj.getMonth() + 1;
+      const day = dateObj.getDate();
+      const hour = dateObj.getHours();
+
+      // 八字簡易估算算法
+      const yearGan = TIAN_GAN[(year - 4) % 10];
+      const yearZhi = DI_ZHI[(year - 4) % 12];
+      const monthGan = TIAN_GAN[(year * 2 + month) % 10];
+      const monthZhi = DI_ZHI[(month + 1) % 12];
+      const dayGan = TIAN_GAN[(Math.floor(year * 5.5 + day) % 10)];
+      const dayZhi = DI_ZHI[(day * 3 + hour) % 12];
+      const hourGan = TIAN_GAN[(hour + day) % 10];
+      const hourZhi = DI_ZHI[Math.floor((hour + 1) / 2) % 12];
+
+      document.getElementById('baziYear').innerText = `${yearGan}${yearZhi}`;
+      document.getElementById('baziMonth').innerText = `${monthGan}${monthZhi}`;
+      document.getElementById('baziDay').innerText = `${dayGan}${dayZhi}`;
+      document.getElementById('baziHour').innerText = `${hourGan}${hourZhi}`;
+
+      // 星座計算
+      const sunSign = getSunSign(month, day);
+      const moonSign = getMoonSign(day, hour);
+      const ascSign = getAscendantSign(hour, month);
+
+      document.getElementById('sunSign').innerText = sunSign;
+      document.getElementById('moonSign').innerText = moonSign;
+      document.getElementById('ascSign').innerText = ascSign;
+
+      // MBTI & 人類圖推算
+      const finalMBTI = mbtiInput === 'AUTO' ? estimateMBTI(dayGan, sunSign) : mbtiInput;
+      const finalHD = hdInput === 'AUTO' ? estimateHDType(sunSign, ascSign) : hdInput;
+      document.getElementById('mbtiResult').innerText = finalMBTI;
+
+      // 計算五行比例
+      const wuxingCounts = { "木": 0, "火": 0, "土": 0, "金": 0, "水": 0 };
+      [yearGan, monthGan, dayGan, hourGan].forEach(g => wuxingCounts[GAN_WUXING[g]]++);
+      [yearZhi, monthZhi, dayZhi, hourZhi].forEach(z => wuxingCounts[ZHI_WUXING[z]]++);
+
+      renderWuxingChart(wuxingCounts);
+      renderHumanDesignCanvas(finalHD);
+
+      // 產生深度文字分析
+      generateTextReports(name, dayGan, sunSign, moonSign, finalMBTI, finalHD, wuxingCounts);
+
+      // 顯示結果
+      document.getElementById('placeholderView').classList.add('hidden');
+      document.getElementById('resultView').classList.remove('hidden');
+      document.getElementById('actionToolbar').classList.remove('hidden');
+    }
+
+    function getSunSign(m, d) {
+      const dates = [20, 19, 21, 20, 21, 22, 23, 23, 23, 24, 23, 22];
+      const signs = ["摩羯座", "水瓶座", "雙魚座", "牡羊座", "金牛座", "雙子座", "巨蟹座", "獅子座", "處女座", "天秤座", "天蠍座", "射手座"];
+      return d < dates[m - 1] ? signs[m - 1] : signs[m % 12];
+    }
+
+    function getMoonSign(day, hour) {
+      const signs = ["金牛座", "雙子座", "巨蟹座", "處女座", "天秤座", "射手座", "水瓶座", "雙魚座"];
+      return signs[(day + hour) % signs.length];
+    }
+
+    function getAscendantSign(hour, month) {
+      const signs = ["牡羊座", "金牛座", "雙子座", "巨蟹座", "獅子座", "處女座", "天秤座", "天蠍座", "射手座", "摩羯座", "水瓶座", "雙魚座"];
+      return signs[(hour + month) % 12];
+    }
+
+    function estimateMBTI(dayGan, sunSign) {
+      if (["甲", "丙", "戊", "庚", "壬"].includes(dayGan)) {
+        return ["ENTJ", "ENFP", "ESTP", "ENTP"][sunSign.length % 4];
+      } else {
+        return ["INFJ", "INFP", "INTJ", "ISFJ"][sunSign.length % 4];
+      }
+    }
+
+    function estimateHDType(sunSign, ascSign) {
+      const types = ["顯示者", "生產者", "顯示生產者", "投射者", "反映者"];
+      return types[(sunSign.length + ascSign.length) % types.length];
+    }
+
+    function renderWuxingChart(counts) {
+      const ctx = document.getElementById('wuxingChart').getContext('2d');
+      if (wuxingChartInstance) wuxingChartInstance.destroy();
+
+      wuxingChartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['木', '火', '土', '金', '水'],
+          datasets: [{
+            data: [counts['木'], counts['火'], counts['土'], counts['金'], counts['水']],
+            backgroundColor: ['#10b981', '#ef4444', '#f59e0b', '#e2e8f0', '#3b82f6'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          plugins: { legend: { labels: { color: '#e2e8f0', font: { size: 11 } } } },
+          responsive: true,
+          maintainAspectRatio: false
+        }
+      });
+
+      let maxElement = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
+      let minElement = Object.keys(counts).reduce((a, b) => counts[a] < counts[b] ? a : b);
+      document.getElementById('wuxingSummary').innerHTML = `五行以 <b class="text-mystic-gold">${maxElement}</b> 能量最強，<b class="text-cyan-300">${minElement}</b> 能量較欠缺。`;
+    }
+
+    function renderHumanDesignCanvas(hdType) {
+      const canvas = document.getElementById('hdCanvas');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // 繪製簡化 9 大能量中心示意圖
+      const centers = [
+        {x: 110, y: 25, shape: 'triangle'}, {x: 110, y: 55, shape: 'inverted-triangle'},
+        {x: 110, y: 90, shape: 'square'}, {x: 110, y: 125, shape: 'diamond'},
+        {x: 60, y: 115, shape: 'triangle'}, {x: 160, y: 115, shape: 'triangle'},
+        {x: 110, y: 160, shape: 'square'}, {x: 60, y: 160, shape: 'square'}, {x: 160, y: 160, shape: 'square'}
+      ];
+
+      centers.forEach((c, idx) => {
+        ctx.beginPath();
+        ctx.fillStyle = (idx % 2 === 0 || hdType.includes("生產")) ? '#d4af37' : '#1d1a38';
+        ctx.strokeStyle = '#d4af37';
+        ctx.lineWidth = 1.5;
+        ctx.arc(c.x, c.y, 10, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      });
+
+      document.getElementById('hdSummary').innerHTML = `人類圖類型：<b class="text-mystic-gold">${hdType}</b>`;
+    }
+
+    function generateTextReports(name, dayGan, sunSign, moonSign, mbti, hdType, wuxing) {
+      document.getElementById('analysisPersonality').innerText = 
+        `${name} 您好！您的日主天干為【${dayGan}】，結合西方【${sunSign}】與 MBTI【${mbti}】：\n` +
+        `您天生具備敏銳的直覺與強大的內在信念。在外人眼中您充滿獨特魅力，面對目標時展現出極高的專注度。同時，月亮位於【${moonSign}】讓您在私下擁有豐富且細膩的情感世界。`;
+
+      document.getElementById('analysisCareer').innerText = 
+        `在事業與天賦策略上，您的人類圖屬於【${hdType}】：\n` +
+        `最好採取『回應與順應熱情』的策略，切忌盲目硬衝。結合五行能量分佈，您非常適合需要決策分析、策略規劃或創意導向的工作領域，能在發揮優勢時獲得極高成就感。`;
+
+      document.getElementById('analysisLove').innerText = 
+        `關於感情與親密關係：\n` +
+        `您渴望深度的靈魂共鳴，而非表面熱鬧。在伴侶關係中，您重視尊重與彼此獨立的成長空間。MBTI【${mbti}】的性格讓您對承諾極為認真，學會坦誠表達內心脆弱將使您的感情更加圓滿。`;
+
+      document.getElementById('analysisAdvice').innerText = 
+        `🌟 開運與人生最佳指引：\n` +
+        `1. 能量補給：五行能量中多接觸自然綠意或與水相關的放鬆環境。\n` +
+        `2. 決策指引：依據【${hdType}】的內在權威，給予自己充分的冷靜期再做重大決定。\n` +
+        `3. 保持心靈彈性，定期給自己獨處與充電的時間。`;
+    }
+
+    function shareURL() {
+      const name = encodeURIComponent(document.getElementById('userName').value);
+      const birthDate = document.getElementById('birthDate').value;
+      const birthTime = document.getElementById('birthTime').value;
+      const mbti = document.getElementById('mbtiSelect').value;
+      const hd = document.getElementById('hdTypeSelect').value;
+
+      const shareLink = `${window.location.origin}${window.location.pathname}?name=${name}&birthDate=${birthDate}&birthTime=${birthTime}&mbti=${mbti}&hd=${hd}`;
+
+      navigator.clipboard.writeText(shareLink).then(() => {
+        alert('專屬報告網址已複製到剪貼簿！您可以發送給好友或分享到社群。');
+      }).catch(() => {
+        alert('複製失敗，請直接複製瀏覽器上方網址：\n' + shareLink);
+      });
+    }
+  </script>
+</body>
+</html>
